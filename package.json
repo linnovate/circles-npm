@@ -1,5 +1,5 @@
 {
-  "name": "circles",
+  "name": "circles-npm",
   "version": "1.0.0",
   "description": "circle module to use circles-api",
   "main": "index.js",
