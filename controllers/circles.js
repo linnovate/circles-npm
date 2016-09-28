@@ -15,7 +15,7 @@ module.exports = function(uri, settings) {
       helpers.getFromCache(api, date, function(circle) {
         if (circle) return callback(null, circle.value);
         request(uri + api, function(error, response, body) {
-          if (error || response.statusCode !== 200) return callback(error || response.statusCode);
+          if (error || response.statusCode !== 200) return callback(error || body);
           helpers.saveToCache(api, body, date);
           return callback(null, body);
         });

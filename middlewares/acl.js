@@ -4,13 +4,10 @@ module.exports = function(uri, settings) {
 	var circles = require('../controllers/circles')(uri, settings);
 
 	return function(req, res, next) {
-		if (req.locals.error) {
-			return next();
-		}
+		req.acl = {};
 		circles.getCircles('mine', req.user.id, function(err, data) {
-			req.acl = {};
 			if (err) {
-				req.locals.error = err;
+				req.acl.error = err;
 				return next();
 			}
 			req.acl.user = JSON.parse(data);
