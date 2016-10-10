@@ -44,10 +44,17 @@ module.exports = function(circleSettings) {
 			};
 
 			for (var type in circleTypes) {
-				var allowed = userAllowed[type].map(function(a) {
-					return a._id;
-				})
-				conditions.$and.push(buildConditions(type, circleTypes[type], allowed, userId));
+				var allowed = {};
+				if(userAllowed != 'no') 
+					allowed = userAllowed[type].map(function(a) {
+						return a._id;
+					})
+				else
+					allowed = userAllowed;
+				var c = buildConditions(type, circleTypes[type], allowed, userId);
+				for (var i = 0 in c)
+					if(c[i]) conditions.$and.push(c[i]);
+				// conditions.$and.push(buildConditions(type, circleTypes[type], allowed, userId));
 			}
 			return Circles.models[model].where(conditions);
 		},
@@ -130,37 +137,41 @@ var buildConditions = function(type, settings, allowed, userId) {
 	var obj1 = {},
 		obj2 = {},
 		obj3 = {};
-	obj1['circles.' + type] = {
-		$in: allowed
-	};
+
+	if(allowed != 'no')	{
+		obj1['circles.' + type] = {
+			$in: allowed
+		};
+	}
 	obj2['circles.' + type] = {
 		$size: 0
 	};
 	obj3['circles.' + type] = {
 		$exists: false
 	};
-	if (settings.watchers) {
-		obj1 = {
-			'$or': [obj1, {
-				watchers: userId
-			}]
-		};
-		obj2 = {
-			'$and': [obj2, {
-				watchers: {
-					$size: 0
-				}
-			}]
-		};
-		obj3 = {
-			'$and': [obj3, {
-				watchers: {
-					$size: 0
-				}
-			}]
-		};
+	for(var i in settings.stronger){
+		var s1 = {}, s2 ={};
+		if ( allowed === 'no'){
+			s1[settings.stronger[i]] = userId;
+			var tmp =  s1;
+		} else {
+			s1[settings.stronger[i]] = userId;
+			obj1 = {
+				'$or': [obj1, s1]
+			};
+			s2[settings.stronger[i]] = {
+				$size: 0
+			};
+			obj2 = {
+				'$and': [obj2, s2]
+			};
+			obj3 = {
+				'$and': [obj3, s2]
+			};
+		}
 	}
-	return {
-		'$or': [obj1, obj2, obj3]
-	}
+
+	var data = (allowed !== 'no') ? [{'$or': [obj1, obj2, obj3]}] : [{'$or': [ obj2, obj3]}, tmp]
+	
+	return data;
 };
