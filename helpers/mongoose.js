@@ -52,7 +52,7 @@ module.exports = function(circleSettings) {
 				else
 					allowed = userAllowed;
 				var c = buildConditions(type, circleTypes[type], allowed, userId);
-				for (var i = 0 in c)
+				for (var i in c)
 					if(c[i]) conditions.$and.push(c[i]);
 				// conditions.$and.push(buildConditions(type, circleTypes[type], allowed, userId));
 			}
