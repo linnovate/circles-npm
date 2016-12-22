@@ -45,7 +45,7 @@ module.exports = function(circleSettings) {
 
 			for (var type in circleTypes) {
 				var allowed = {};
-				if(userAllowed != 'no') 
+				if (userAllowed != 'no')
 					allowed = userAllowed[type].map(function(a) {
 						return a._id;
 					})
@@ -53,8 +53,8 @@ module.exports = function(circleSettings) {
 					allowed = userAllowed;
 				var c = buildConditions(type, circleTypes[type], allowed, userId);
 				for (var i in c)
-					if(c[i]) conditions.$and.push(c[i]);
-				// conditions.$and.push(buildConditions(type, circleTypes[type], allowed, userId));
+					if (c[i]) conditions.$and.push(c[i]);
+					// conditions.$and.push(buildConditions(type, circleTypes[type], allowed, userId));
 			}
 			return Circles.models[model].where(conditions);
 		},
@@ -138,7 +138,7 @@ var buildConditions = function(type, settings, allowed, userId) {
 		obj2 = {},
 		obj3 = {};
 
-	if(allowed != 'no')	{
+	if (allowed != 'no') {
 		obj1['circles.' + type] = {
 			$in: allowed
 		};
@@ -149,19 +149,21 @@ var buildConditions = function(type, settings, allowed, userId) {
 	obj3['circles.' + type] = {
 		$exists: false
 	};
-	for(var i in settings.stronger){
-		var s1 = {}, s2 ={};
-		if ( allowed === 'no'){
-			s1[settings.stronger[i]] = userId;
-			var tmp =  s1;
+	for (var i in settings.stronger) {
+		var s1 = {}, s2 = {};
+		if (allowed === 'no') {
+			s1[settings.stronger[i].name] = userId;
+			var tmp = s1;
 		} else {
-			s1[settings.stronger[i]] = userId;
+			s1[settings.stronger[i].name] = userId;
 			obj1 = {
 				'$or': [obj1, s1]
 			};
-			s2[settings.stronger[i]] = {
-				$size: 0
-			};
+			if (settings.stronger[i].type === 'Array') {
+				s2[settings.stronger[i]] = {
+					$size: 0
+				};
+			}
 			obj2 = {
 				'$and': [obj2, s2]
 			};
@@ -171,7 +173,13 @@ var buildConditions = function(type, settings, allowed, userId) {
 		}
 	}
 
-	var data = (allowed !== 'no') ? [{'$or': [obj1, obj2, obj3]}] : [{'$or': [ obj2, obj3]}, tmp]
-	
+	var data = (allowed !== 'no') ? [{
+		'$or': [obj1, obj2, obj3]
+	}] : [{
+			'$or': [obj2, obj3]
+		},
+		tmp
+	]
+	console.log(JSON.stringify(data))
 	return data;
 };
