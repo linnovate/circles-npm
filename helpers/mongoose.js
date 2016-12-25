@@ -180,6 +180,5 @@ var buildConditions = function(type, settings, allowed, userId) {
 		},
 		tmp
 	]
-	console.log(JSON.stringify(data))
 	return data;
 };
