@@ -149,11 +149,12 @@ var buildConditions = function(type, settings, allowed, userId) {
 	obj3['circles.' + type] = {
 		$exists: false
 	};
+	var tmp = [];
 	for (var i in settings.stronger) {
 		var s1 = {}, s2 = {};
 		if (allowed === 'no') {
 			s1[settings.stronger[i].name] = userId;
-			var tmp = s1;
+			tmp.push(s1);
 		} else {
 			s1[settings.stronger[i].name] = userId;
 			obj1 = {
@@ -173,13 +174,19 @@ var buildConditions = function(type, settings, allowed, userId) {
 		}
 	}
 
-	var data = (allowed !== 'no') ? [{
-		'$or': [obj1, obj2, obj3]
-	}] : [{
+	if (allowed !== 'no') {
+		var data = [{
+			'$or': [obj1, obj2, obj3]
+		}];
+	} else {
+		var data = [{
 			'$or': [obj2, obj3]
-		},
-		tmp
-	]
-	console.log(JSON.stringify(data))
+		}];
+		if (tmp.length) {
+			data.push({
+				'$or': tmp
+			});
+		}
+	}
 	return data;
 };
