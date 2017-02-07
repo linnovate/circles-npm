@@ -5,6 +5,10 @@ module.exports = function(uri, settings) {
 
 	return function(req, res, next) {
 		req.acl = {};
+		if (!req || !req.user || !req.user.id) {
+			req.acl.error = new Error('Missing user id');
+			return next();
+		}
 		circles.getCircles('mine', req.user.id, function(err, data) {
 			req.acl = {};
 			if (err) {
